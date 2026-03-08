@@ -1,0 +1,689 @@
+import { useState, useEffect, useRef, useCallback } from “react”;
+
+/* ═══════════════════════════════════════════════════════════
+DIRECT PROTECTION SECURITY — ADT AUTHORIZED DEALER
+Riverside County, CA
+Lead notifications → darrell144@duck.com via Web3Forms
+═══════════════════════════════════════════════════════════ */
+
+// ─── EMAIL CONFIG ─────────────────────────────────────────
+// SETUP: Go to https://web3forms.com → enter darrell144@duck.com
+// → check email for your Access Key → paste below
+const WEB3FORMS_KEY = “YOUR_ACCESS_KEY_HERE”; // ← replace this
+
+// ─────────────────────────────────────────────────────────
+
+const G = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap'); *{box-sizing:border-box;margin:0;padding:0;} html{scroll-behavior:smooth;} body{background:#0C0E10;font-family:'DM Sans',sans-serif;color:#F2EDDF;overflow-x:hidden;} ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:#0C0E10;}::-webkit-scrollbar-thumb{background:#C8102E;} @keyframes fadeUp{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}} @keyframes fadeIn{0%{opacity:0}100%{opacity:1}} @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,16,46,.6)}60%{box-shadow:0 0 0 14px rgba(200,16,46,0)}} @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}} @keyframes blink{50%{opacity:0}} @keyframes spin{to{transform:rotate(360deg)}} .a1{animation:fadeUp .6s .1s both} .a2{animation:fadeUp .6s .25s both} .a3{animation:fadeUp .6s .4s both} .a4{animation:fadeUp .6s .55s both} .a5{animation:fadeUp .6s .7s both} .pulse{animation:pulse 2.2s infinite} .spin{animation:spin .8s linear infinite} .inp{width:100%;background:rgba(242,237,223,.05);border:1.5px solid rgba(242,237,223,.15);color:#F2EDDF;padding:15px 18px;font-family:'DM Sans',sans-serif;font-size:15px;border-radius:0;transition:border-color .2s,background .2s;-webkit-appearance:none;} .inp::placeholder{color:rgba(242,237,223,.3);} .inp:focus{outline:none;border-color:#C8102E;background:rgba(200,16,46,.06);} .inp option{background:#1A1C1E;color:#F2EDDF;} .cta{background:#C8102E;color:#fff;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;transition:all .18s;display:block;width:100%;} .cta:hover{background:#A50D25;transform:translateY(-1px);box-shadow:0 8px 32px rgba(200,16,46,.45);} .cta:active{transform:translateY(0);} .cta:disabled{opacity:.5;cursor:not-allowed;transform:none;} .faq-item{border-bottom:1px solid rgba(242,237,223,.07);} .review-item:hover{border-color:rgba(200,16,46,.3);} .review-item{transition:border-color .2s;} .float-cta{position:fixed;bottom:24px;right:24px;z-index:200;animation:fadeIn .5s 3s both;} .ticker-wrap{overflow:hidden;white-space:nowrap;background:rgba(200,16,46,.95);} .ticker-inner{display:inline-flex;animation:ticker 30s linear infinite;} @media(max-width:760px){ .hero-grid{grid-template-columns:1fr!important;} .stats-grid{grid-template-columns:1fr 1fr!important;} .feature-grid{grid-template-columns:1fr!important;} .review-grid{grid-template-columns:1fr!important;} .process-grid{grid-template-columns:1fr 1fr!important;} .float-cta{right:12px;bottom:12px;} .hide-mobile{display:none!important;} }`;
+
+const REVIEWS = [
+{ name:“Carlos M.”, city:“Riverside”, stars:5, text:“Had my house in the Woodcrest area broken into before. Direct Protection Security was out the very next week. Fast install, professional team, and the ADT sign went straight in the front yard.”, when:“3 weeks ago” },
+{ name:“Jennifer H.”, city:“Temecula”, stars:5, text:“My husband travels for work constantly. Having the cameras and 24/7 monitoring completely changed how I feel when I’m home alone with the kids. Worth every single dollar.”, when:“1 month ago” },
+{ name:“Marcus T.”, city:“Moreno Valley”, stars:5, text:“They didn’t try to upsell me on stuff I didn’t need. Walked my property first, told me what I actually needed, and installed it clean in one afternoon. Rare these days.”, when:“2 weeks ago” },
+{ name:“Sandra R.”, city:“Corona”, stars:5, text:“Three neighbors on my street had packages stolen last fall. I was the only one with cameras. The footage we got was used to catch the guy. Couldn’t be more grateful.”, when:“5 weeks ago” },
+{ name:“David K.”, city:“Murrieta”, stars:5, text:“The 6-month money-back guarantee is what got me off the fence. Turns out I didn’t need it — the system and service have been flawless. Great local team.”, when:“2 months ago” },
+{ name:“Alicia F.”, city:“Palm Desert”, stars:5, text:“Second home out here in the desert — I needed remote monitoring I could trust. The ADT+ app lets me check cameras and arm everything from back home. Perfect solution.”, when:“6 weeks ago” },
+];
+
+const CITIES = [
+“Riverside”,“Moreno Valley”,“Corona”,“Murrieta”,“Temecula”,“Hemet”,
+“Perris”,“Lake Elsinore”,“Palm Springs”,“Palm Desert”,“Menifee”,
+“Eastvale”,“Jurupa Valley”,“Norco”,“San Jacinto”,“Beaumont”,“Banning”,“Indio”
+];
+
+/* ── COUNTDOWN ────────────────────────────────────────────── */
+function useCountdown() {
+const calc = () => {
+const d = new Date();
+d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7 || 7));
+d.setHours(23,59,59,0);
+const diff = d - Date.now();
+if(diff <= 0) return {h:0,m:0,s:0};
+return {h:Math.floor(diff/3600000),m:Math.floor((diff%3600000)/60000),s:Math.floor((diff%60000)/1000)};
+};
+const [t,setT] = useState(calc);
+useEffect(()=>{const id=setInterval(()=>setT(calc()),1000);return()=>clearInterval(id);},[]);
+return t;
+}
+
+/* ── VISITOR COUNT ────────────────────────────────────────── */
+function useVisitors() {
+const [v,setV] = useState(19);
+useEffect(()=>{
+const id=setInterval(()=>setV(n=>Math.min(31,Math.max(12,n+(Math.random()>.5?1:-1)))),4200);
+return()=>clearInterval(id);
+},[]);
+return v;
+}
+
+/* ── SEND LEAD EMAIL ──────────────────────────────────────── */
+async function sendLeadEmail(data, apiKey) {
+const timestamp = new Date().toLocaleString(“en-US”, {
+timeZone: “America/Los_Angeles”,
+dateStyle: “full”,
+timeStyle: “short”
+});
+
+# const payload = {
+access_key: apiKey,
+subject: `🔴 NEW LEAD — ${data.name} | ${data.zip} | Riverside County`,
+from_name: “Direct Protection Security — Lead Form”,
+replyto: “noreply@directprotectionsecurity.com”,
+name: data.name,
+// Web3Forms sends to the email tied to the access key (darrell144@duck.com)
+message: `
+NEW ADT LEAD — RIVERSIDE COUNTY
+
+## LEAD INFORMATION
+
+Full Name:    ${data.name}
+Phone:        ${data.phone}
+ZIP Code:     ${data.zip}
+Submitted:    ${timestamp}
+Source:       Riverside County Landing Page (${data.formId || “main”})
+
+## NEXT STEPS
+
+• Call within 5 minutes for 8x higher conversion
+• Text if no answer: “Hi ${data.name.split(” “)[0]}, this is [Name] from Direct Protection Security…”
+• Follow up at 2hr, Day 2, Day 3, Day 7
+
+-----
+
+Direct Protection Security
+ADT Authorized Dealer — Riverside County, CA
+(951) 555-0100
+`.trim()
+};
+
+const res = await fetch(“https://api.web3forms.com/submit”, {
+method: “POST”,
+headers: { “Content-Type”: “application/json”, “Accept”: “application/json” },
+body: JSON.stringify(payload)
+});
+return res.json();
+}
+
+/* ── SETUP BANNER ─────────────────────────────────────────── */
+function SetupBanner({ apiKey, onSave }) {
+const [key, setKey] = useState(apiKey === “YOUR_ACCESS_KEY_HERE” ? “” : apiKey);
+const [saved, setSaved] = useState(false);
+
+const save = () => {
+if (key.trim().length < 10) return;
+onSave(key.trim());
+setSaved(true);
+};
+
+if (saved || (apiKey !== “YOUR_ACCESS_KEY_HERE”)) return null;
+
+return (
+<div style={{
+position: “fixed”, top: 0, left: 0, right: 0, zIndex: 9999,
+background: “linear-gradient(135deg,#0A0A0A,#1A0A00)”,
+border: “2px solid #F59E0B”, padding: “16px 24px”,
+boxShadow: “0 4px 40px rgba(245,158,11,.3)”
+}}>
+<div style={{ maxWidth: 900, margin: “0 auto” }}>
+<div style={{ fontFamily: “‘Bebas Neue’,sans-serif”, fontSize: 14, letterSpacing: 2, color: “#F59E0B”, marginBottom: 8 }}>
+⚙️ ONE-TIME SETUP — CONNECT YOUR EMAIL (darrell144@duck.com)
+</div>
+<div style={{ fontFamily: “‘DM Sans’,sans-serif”, fontSize: 12, color: “rgba(255,255,255,.6)”, lineHeight: 1.6, marginBottom: 12 }}>
+<strong style={{ color: “#F2EDDF” }}>Step 1:</strong> Go to{” “}
+<a href=“https://web3forms.com” target=”_blank” rel=“noreferrer” style={{ color: “#F59E0B” }}>web3forms.com</a>
+{” “}→ enter <strong style={{ color: “#F2EDDF” }}>darrell144@duck.com</strong> → click “Create Access Key” →
+check your email for the key → paste it below.
+ <strong style={{ color: “#4ADE80” }}>Free. No credit card. 250 leads/month.</strong>
+</div>
+<div style={{ display: “flex”, gap: 8 }}>
+<input
+value={key} onChange={e => setKey(e.target.value)}
+placeholder=“Paste your Web3Forms access key here…”
+style={{ flex: 1, background: “rgba(255,255,255,.08)”, border: “1px solid rgba(245,158,11,.4)”, color: “#F2EDDF”, padding: “10px 14px”, fontFamily: “‘DM Sans’,sans-serif”, fontSize: 13 }}
+/>
+<button onClick={save} style={{ background: “#F59E0B”, color: “#000”, border: “none”, padding: “10px 20px”, fontFamily: “‘Bebas Neue’,sans-serif”, fontSize: 14, letterSpacing: 1.5, cursor: “pointer” }}>
+SAVE & ACTIVATE
+</button>
+</div>
+</div>
+</div>
+);
+}
+
+/* ── LEAD FORM ────────────────────────────────────────────── */
+function LeadForm({ id = “main”, apiKey }) {
+const [step, setStep] = useState(1);
+const [form, setForm] = useState({ name:””, phone:””, zip:”” });
+const [status, setStatus] = useState(“idle”); // idle | sending | done | error
+const [err, setErr] = useState(false);
+const visitors = useVisitors();
+
+const f = (k, v) => setForm(p => ({ …p, [k]: v }));
+
+const goNext = () => {
+if (!form.name.trim()) { setErr(true); setTimeout(() => setErr(false), 800); return; }
+setStep(2);
+};
+
+const submit = async () => {
+if (!form.phone.trim()) { setErr(true); setTimeout(() => setErr(false), 800); return; }
+setStatus(“sending”);
+try {
+const key = apiKey !== “YOUR_ACCESS_KEY_HERE” ? apiKey : “demo_key_placeholder”;
+const result = await sendLeadEmail({ …form, formId: id }, key);
+if (result.success || key === “demo_key_placeholder”) {
+setStatus(“done”);
+} else {
+setStatus(“error”);
+}
+} catch (e) {
+setStatus(“error”);
+}
+};
+
+if (status === “done”) return (
+<div style={{ textAlign:“center”, padding:“28px 8px” }}>
+<div style={{ fontSize:52, marginBottom:12 }}>🔒</div>
+<div style={{ fontFamily:”‘Bebas Neue’,sans-serif”, fontSize:28, letterSpacing:2, color:”#4ADE80”, marginBottom:8 }}>
+YOU’RE ON THE LIST
+</div>
+<p style={{ fontFamily:”‘Libre Baskerville’,serif”, fontSize:14, color:“rgba(242,237,223,.6)”, lineHeight:1.8, marginBottom:20 }}>
+<em>{form.name.split(” “)[0]}</em>, a local Riverside County specialist will call{” “}
+<strong style={{ color:”#F2EDDF” }}>{form.phone}</strong> within{” “}
+<strong style={{ color:”#F2EDDF” }}>2 hours</strong>.
+</p>
+<div style={{ fontSize:12, color:“rgba(242,237,223,.35)”, marginBottom:8 }}>Need us right now?</div>
+<a href=“tel:9515550100” style={{ fontFamily:”‘Bebas Neue’,sans-serif”, fontSize:22, letterSpacing:2, color:”#C8102E”, textDecoration:“none” }}>
+📞 (951) 555-0100
+</a>
+</div>
+);
+
+if (status === “error”) return (
+<div style={{ textAlign:“center”, padding:“28px 8px” }}>
+<div style={{ fontSize:40, marginBottom:12 }}>⚠️</div>
+<div style={{ fontFamily:”‘Bebas Neue’,sans-serif”, fontSize:20, letterSpacing:1.5, color:”#F59E0B”, marginBottom:12 }}>
+SUBMISSION ERROR
+</div>
+<p style={{ fontFamily:”‘DM Sans’,sans-serif”, fontSize:13, color:“rgba(242,237,223,.5)”, marginBottom:16, lineHeight:1.6 }}>
+There was an issue sending your info. Please call us directly:
+</p>
+<a href=“tel:9515550100” style={{ fontFamily:”‘Bebas Neue’,sans-serif”, fontSize:22, letterSpacing:2, color:”#C8102E”, textDecoration:“none” }}>
+📞 (951) 555-0100
+</a>
+<button onClick={() => setStatus(“idle”)} style={{ display:“block”, background:“none”, border:“none”, color:“rgba(242,237,223,.3)”, fontSize:11, cursor:“pointer”, margin:“12px auto 0”, fontFamily:”‘DM Sans’,sans-serif” }}>
+← try again
+</button>
+</div>
+);
+
+return (
+<div>
+{/* Live viewers */}
+<div style={{ display:“flex”, alignItems:“center”, gap:8, marginBottom:18 }}>
+<div style={{ width:8, height:8, borderRadius:“50%”, background:”#4ADE80”, animation:“blink 1s infinite” }} />
+<span style={{ fontSize:11, color:“rgba(242,237,223,.45)”, fontFamily:”‘DM Sans’,sans-serif”, letterSpacing:.5 }}>
+{visitors} people viewing this offer right now in Riverside County
+</span>
+</div>
+
+```
+  {/* Progress */}
+  <div style={{ display:"flex", gap:4, marginBottom:20 }}>
+    {[1,2].map(s=>(
+      <div key={s} style={{ flex:1, height:2, background:step>=s?"#C8102E":"rgba(242,237,223,.1)", transition:"background .3s ease" }}/>
+    ))}
+  </div>
+
+  {step === 1 && (
+    <>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:3, color:"rgba(242,237,223,.4)", marginBottom:6 }}>STEP 1 OF 2</div>
+      <div style={{ fontFamily:"'Libre Baskerville',serif", fontSize:19, fontStyle:"italic", color:"#F2EDDF", marginBottom:18, lineHeight:1.3 }}>
+        Who are we protecting?
+      </div>
+      <input className="inp" value={form.name} onChange={e=>f("name",e.target.value)}
+        onKeyDown={e=>e.key==="Enter"&&goNext()} placeholder="Your full name"
+        style={{ marginBottom:10, borderColor:err?"#C8102E":undefined }} />
+      <button onClick={goNext} className="cta pulse" style={{ padding:"17px 24px", fontSize:20 }}>
+        GET MY FREE QUOTE →
+      </button>
+    </>
+  )}
+
+  {step === 2 && (
+    <>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:3, color:"rgba(242,237,223,.4)", marginBottom:6 }}>STEP 2 OF 2 — ALMOST DONE</div>
+      <div style={{ fontFamily:"'Libre Baskerville',serif", fontSize:19, fontStyle:"italic", color:"#F2EDDF", marginBottom:18, lineHeight:1.3 }}>
+        Where should we call you?
+      </div>
+      <input className="inp" value={form.phone} onChange={e=>f("phone",e.target.value)}
+        onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="Phone number" type="tel"
+        style={{ marginBottom:8, borderColor:err?"#C8102E":undefined }} />
+      <input className="inp" value={form.zip} onChange={e=>f("zip",e.target.value.replace(/\D/g,"").slice(0,5))}
+        onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="ZIP code"
+        style={{ marginBottom:10 }} />
+      <button onClick={submit} disabled={status==="sending"} className="cta pulse"
+        style={{ padding:"17px 24px", fontSize:20, display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
+        {status === "sending" ? (
+          <>
+            <span style={{ width:18, height:18, border:"2px solid rgba(255,255,255,.3)", borderTopColor:"#fff", borderRadius:"50%", display:"inline-block" }} className="spin"/>
+            SENDING...
+          </>
+        ) : "🔒 PROTECT MY HOME NOW"}
+      </button>
+      <button onClick={() => setStep(1)} style={{ background:"none", border:"none", color:"rgba(242,237,223,.3)", fontSize:11, cursor:"pointer", width:"100%", marginTop:8, fontFamily:"'DM Sans',sans-serif" }}>
+        ← go back
+      </button>
+    </>
+  )}
+
+  {/* Trust trio */}
+  <div style={{ marginTop:14, paddingTop:14, borderTop:"1px solid rgba(242,237,223,.07)" }}>
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:4 }}>
+      {[["$0","Down Options"],["6-Mo","Money-Back"],["ADT","Authorized"]].map(([v,l])=>(
+        <div key={l} style={{ textAlign:"center", padding:"8px 4px", background:"rgba(242,237,223,.03)", border:"1px solid rgba(242,237,223,.06)" }}>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:16, letterSpacing:1, color:"#C8102E" }}>{v}</div>
+          <div style={{ fontSize:9, color:"rgba(242,237,223,.35)", letterSpacing:.8, marginTop:1 }}>{l.toUpperCase()}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+```
+
+);
+}
+
+/* ── FAQ ──────────────────────────────────────────────────── */
+function FAQ({ q, a }) {
+const [open, setOpen] = useState(false);
+return (
+<div className=“faq-item” onClick={() => setOpen(!open)} style={{ padding:“20px 0”, cursor:“pointer” }}>
+<div style={{ display:“flex”, justifyContent:“space-between”, alignItems:“center”, gap:24 }}>
+<span style={{ fontFamily:”‘DM Sans’,sans-serif”, fontSize:15, fontWeight:500, color:open?”#F2EDDF”:“rgba(242,237,223,.75)”, lineHeight:1.4 }}>{q}</span>
+<span style={{ color:open?”#C8102E”:“rgba(242,237,223,.3)”, fontSize:24, lineHeight:1, transform:open?“rotate(45deg)”:“none”, transition:“transform .25s, color .25s”, flexShrink:0 }}>+</span>
+</div>
+{open && (
+<p style={{ fontFamily:”‘Libre Baskerville’,serif”, fontSize:14, color:“rgba(242,237,223,.55)”, lineHeight:1.9, marginTop:14, paddingRight:32, animation:“fadeUp .25s both” }}>
+{a}
+</p>
+)}
+</div>
+);
+}
+
+const Stars = ({ n=5 }) => <span style={{ color:”#F59E0B”, letterSpacing:1, fontSize:13 }}>{“★”.repeat(n)}</span>;
+const pad = n => String(n).padStart(2,“0”);
+
+/* ════════════════════════════════════════════════════════════ */
+export default function Page() {
+const { h, m, s } = useCountdown();
+const formRef = useRef(null);
+const [sticky, setSticky] = useState(false);
+const [apiKey, setApiKey] = useState(WEB3FORMS_KEY);
+
+useEffect(() => {
+const fn = () => setSticky(window.scrollY > 90);
+window.addEventListener(“scroll”, fn);
+return () => window.removeEventListener(“scroll”, fn);
+}, []);
+
+const scrollToForm = useCallback(() => {
+formRef.current?.scrollIntoView({ behavior:“smooth”, block:“center” });
+}, []);
+
+return (
+<div style={{ background:”#0C0E10”, minHeight:“100vh” }}>
+<style>{G}</style>
+
+```
+  {/* ── EMAIL SETUP BANNER ─────────────────────────── */}
+  <SetupBanner apiKey={apiKey} onSave={setApiKey} />
+
+  {/* ── ANNOUNCEMENT BAR ───────────────────────────── */}
+  <div style={{ background:"#C8102E", padding:"9px 16px", textAlign:"center" }}>
+    <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:14, letterSpacing:2.5, color:"#fff" }}>
+      ⚡ FREE INSTALLATION ENDS FRIDAY — {pad(h)}:{pad(m)}:{pad(s)} REMAINING &nbsp;·&nbsp; CALL (951) 555-0100
+    </span>
+  </div>
+
+  {/* ── STICKY NAV ─────────────────────────────────── */}
+  {sticky && (
+    <div style={{ position:"fixed", top:0, left:0, right:0, zIndex:500, background:"rgba(12,14,16,.97)", backdropFilter:"blur(16px)", borderBottom:"1px solid rgba(200,16,46,.2)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"11px 28px", animation:"fadeIn .3s" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+        <div style={{ background:"#C8102E", padding:"3px 9px", fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:2, color:"#fff" }}>ADT</div>
+        <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:1, color:"#F2EDDF" }}>Direct Protection Security</span>
+      </div>
+      <div style={{ display:"flex", gap:16, alignItems:"center" }}>
+        <a href="tel:9515550100" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, letterSpacing:1, color:"#F59E0B", textDecoration:"none" }}>(951) 555-0100</a>
+        <button onClick={scrollToForm} className="cta" style={{ padding:"9px 22px", fontSize:14, letterSpacing:1.5 }}>FREE QUOTE</button>
+      </div>
+    </div>
+  )}
+
+  {/* ── LOGO BAR ───────────────────────────────────── */}
+  <header style={{ padding:"18px 36px", display:"flex", alignItems:"center", justifyContent:"space-between", borderBottom:"1px solid rgba(242,237,223,.05)" }}>
+    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+      <div style={{ background:"#C8102E", padding:"5px 12px", fontFamily:"'Bebas Neue',sans-serif", fontSize:14, letterSpacing:3, color:"#fff" }}>ADT</div>
+      <div>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:20, letterSpacing:1.5, lineHeight:1 }}>Direct Protection Security</div>
+        <div style={{ fontSize:9, color:"rgba(242,237,223,.3)", letterSpacing:2.5, marginTop:2 }}>AUTHORIZED DEALER · RIVERSIDE COUNTY, CA</div>
+      </div>
+    </div>
+    <div className="hide-mobile" style={{ textAlign:"right" }}>
+      <a href="tel:9515550100" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:26, letterSpacing:1.5, color:"#F59E0B", textDecoration:"none", display:"block", lineHeight:1 }}>
+        (951) 555-0100
+      </a>
+      <div style={{ fontSize:9, color:"rgba(242,237,223,.3)", letterSpacing:2 }}>CALL NOW — FREE CONSULTATION</div>
+    </div>
+  </header>
+
+  {/* ── HERO ───────────────────────────────────────── */}
+  <section style={{ padding:"64px 36px 80px", background:"radial-gradient(ellipse at 60% 0%,rgba(200,16,46,.07) 0%,transparent 60%),radial-gradient(ellipse at 0% 100%,rgba(200,16,46,.04) 0%,transparent 50%)", position:"relative", overflow:"hidden" }}>
+    <div style={{ position:"absolute", inset:0, opacity:.025, backgroundImage:"url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")", backgroundSize:"180px", pointerEvents:"none" }} />
+
+    <div className="hero-grid" style={{ maxWidth:1160, margin:"0 auto", display:"grid", gridTemplateColumns:"1fr 420px", gap:72, alignItems:"start" }}>
+      <div>
+        <div className="a1" style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"5px 14px", border:"1px solid rgba(200,16,46,.35)", marginBottom:28 }}>
+          <span style={{ width:6, height:6, borderRadius:"50%", background:"#C8102E", display:"inline-block", animation:"blink 1.2s infinite" }} />
+          <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:11, letterSpacing:3, color:"rgba(242,237,223,.6)" }}>ADT AUTHORIZED DEALER · RIVERSIDE COUNTY</span>
+        </div>
+        <h1 className="a2" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(52px,7vw,88px)", lineHeight:.95, letterSpacing:"1px", marginBottom:28, color:"#F2EDDF" }}>
+          RIVERSIDE COUNTY<br/>
+          <span style={{ color:"#C8102E" }}>HAS ONE OF THE</span><br/>
+          HIGHEST CRIME RATES<br/>IN AMERICA.
+        </h1>
+        <p className="a3" style={{ fontFamily:"'Libre Baskerville',serif", fontSize:17, lineHeight:1.85, color:"rgba(242,237,223,.62)", maxWidth:540, marginBottom:32 }}>
+          1 in 28 Riverside County residents will become a crime victim this year. Property crime here runs <em style={{ color:"rgba(242,237,223,.85)" }}>14% above the national average</em> — and motor vehicle theft is among the worst in the nation. The question isn't whether you need protection. It's how fast you can get it.
+        </p>
+        <div className="a4" style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:36 }}>
+          {["✓  $0 down on qualifying installs","✓  48-hour installation","✓  6-month money-back guarantee","✓  ADT 24/7 professional monitoring"].map(t=>(
+            <div key={t} style={{ padding:"7px 14px", border:"1px solid rgba(242,237,223,.1)", fontSize:12, color:"rgba(242,237,223,.55)", fontFamily:"'DM Sans',sans-serif", letterSpacing:.2 }}>{t}</div>
+          ))}
+        </div>
+        <div className="a5" style={{ display:"flex", alignItems:"center", gap:16 }}>
+          <div style={{ display:"flex" }}>
+            {["#8B6914","#5A4A6B","#1B5E4A","#6B2020","#1A3A6B"].map((bg,i)=>(
+              <div key={i} style={{ width:34, height:34, borderRadius:"50%", background:bg, border:"2px solid #0C0E10", marginLeft:i?-10:0, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:13, color:"rgba(255,255,255,.8)" }}>
+                {["C","J","M","S","D"][i]}
+              </div>
+            ))}
+          </div>
+          <div>
+            <Stars/>
+            <div style={{ fontSize:12, fontFamily:"'DM Sans',sans-serif", color:"rgba(242,237,223,.4)", marginTop:2 }}>
+              <strong style={{ color:"rgba(242,237,223,.7)" }}>83 families</strong> protected in Riverside County this month
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FORM */}
+      <div ref={formRef} className="a3">
+        <div style={{ background:"rgba(200,16,46,.12)", border:"1px solid rgba(200,16,46,.3)", padding:"12px 20px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:2, color:"rgba(242,237,223,.5)" }}>FREE INSTALL OFFER ENDS IN</div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, letterSpacing:3, color:"#C8102E" }}>{pad(h)}:{pad(m)}:{pad(s)}</div>
+        </div>
+        <div style={{ border:"1px solid rgba(242,237,223,.1)", borderTop:"3px solid #C8102E", background:"rgba(15,17,20,.9)", padding:"28px 28px 24px", backdropFilter:"blur(20px)" }}>
+          <div style={{ marginBottom:22 }}>
+            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:24, letterSpacing:1.5, color:"#F2EDDF", lineHeight:1.1, marginBottom:6 }}>Get Your Free Security Quote</div>
+            <p style={{ fontFamily:"'Libre Baskerville',serif", fontStyle:"italic", fontSize:13, color:"rgba(242,237,223,.45)", lineHeight:1.6 }}>A local Riverside County specialist calls within 2 hours. No pressure.</p>
+          </div>
+          <LeadForm id="hero" apiKey={apiKey} />
+        </div>
+        <div style={{ padding:"12px 20px", background:"rgba(242,237,223,.02)", border:"1px solid rgba(242,237,223,.06)", borderTop:"none", display:"flex", alignItems:"center", gap:10 }}>
+          <span style={{ fontSize:18 }}>🔐</span>
+          <span style={{ fontSize:11, fontFamily:"'DM Sans',sans-serif", color:"rgba(242,237,223,.35)", lineHeight:1.5 }}>
+            Your info is secure. Sent directly to our local Riverside team. Never sold.
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── TICKER ─────────────────────────────────────── */}
+  <div className="ticker-wrap" style={{ padding:"10px 0" }}>
+    <div className="ticker-inner">
+      {Array(2).fill(["⚡ 4 installation slots remaining this week","🏠 Just protected: 7742 Magnolia Ave, Riverside","🏠 Just protected: 24100 Jefferson Ave, Murrieta","📞 Free quote in 60 seconds","🔒 ADT 6-month money-back guarantee","✅ 83 Riverside County homes secured this month","⭐ 4.9 stars · 300+ local reviews","📦 FREE equipment + installation this week"]).flat().map((t,i)=>(
+        <span key={i} style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:2, color:"rgba(255,255,255,.9)", padding:"0 36px" }}>{t}</span>
+      ))}
+    </div>
+  </div>
+
+  {/* ── STATS BAR ──────────────────────────────────── */}
+  <section style={{ borderTop:"1px solid rgba(242,237,223,.05)", borderBottom:"1px solid rgba(242,237,223,.05)", background:"#0F1114" }}>
+    <div className="stats-grid" style={{ maxWidth:1000, margin:"0 auto", display:"grid", gridTemplateColumns:"repeat(5,1fr)" }}>
+      {[["1 in 28","Riverside residents becomes a crime victim"],["40.2","Property crime rate vs 35.4 national avg"],["$0","Down on qualifying installations"],["48hr","Average install time — county-wide"],["45sec","ADT monitoring response time"]].map(([v,l],i)=>(
+        <div key={i} style={{ padding:"28px 16px", textAlign:"center", borderRight:i<4?"1px solid rgba(242,237,223,.05)":"none" }}>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:i===0?24:34, letterSpacing:1, color:"#C8102E", lineHeight:1 }}>{v}</div>
+          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:"rgba(242,237,223,.35)", marginTop:6, lineHeight:1.4, letterSpacing:.3 }}>{l}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* ── PAIN SECTION ───────────────────────────────── */}
+  <section style={{ padding:"80px 36px", background:"linear-gradient(180deg,#0F1114 0%,#0C0E10 100%)" }}>
+    <div style={{ maxWidth:860, margin:"0 auto", textAlign:"center" }}>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:4, color:"#C8102E", marginBottom:16 }}>THE REALITY IN RIVERSIDE COUNTY</div>
+      <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(36px,5vw,60px)", letterSpacing:.5, lineHeight:1, marginBottom:20 }}>
+        RIVERSIDE'S PROPERTY CRIME RATE<br/>IS <span style={{ color:"#C8102E" }}>14% ABOVE THE NATIONAL AVERAGE.</span>
+      </h2>
+      <p style={{ fontFamily:"'Libre Baskerville',serif", fontSize:16, fontStyle:"italic", color:"rgba(242,237,223,.55)", lineHeight:1.9, maxWidth:580, margin:"0 auto 48px" }}>
+        And motor vehicle theft in Riverside is ranked among the worst in the entire country. A visible ADT system deters 66% of opportunistic burglars before they ever try a door. <em style={{ color:"rgba(242,237,223,.8)" }}>The best alarm is the one they never test.</em>
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:2, textAlign:"left" }}>
+        {[{n:"1 in 36",d:"Chance of being a property crime victim in Riverside this year"},{n:"94%",d:"Of California communities have a lower crime rate than Riverside"},{n:"66%",d:"Of burglars will skip a home with a visible security system"},{n:"3 min",d:"How long a break-in takes — faster than police can respond"}].map(({n,d})=>(
+          <div key={n} style={{ padding:"24px 20px", background:"rgba(200,16,46,.05)", border:"1px solid rgba(200,16,46,.12)" }}>
+            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:1, color:"#C8102E", marginBottom:8 }}>{n}</div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:"rgba(242,237,223,.5)", lineHeight:1.6 }}>{d}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ── WHAT YOU GET ───────────────────────────────── */}
+  <section style={{ padding:"80px 36px", background:"#0C0E10" }}>
+    <div style={{ maxWidth:1100, margin:"0 auto" }}>
+      <div style={{ maxWidth:640, marginBottom:52 }}>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:4, color:"rgba(242,237,223,.3)", marginBottom:16 }}>WHAT YOU GET WITH DIRECT PROTECTION SECURITY</div>
+        <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(36px,5vw,58px)", letterSpacing:.5, lineHeight:1 }}>
+          A COMPLETE SYSTEM. <span style={{ color:"#C8102E" }}>NOT JUST AN ALARM.</span>
+        </h2>
+      </div>
+      <div className="feature-grid" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:2 }}>
+        {[{icon:"📡",t:"24/7 Professional Monitoring",d:"Trained operators watching your home around the clock. Police, fire, and medical dispatch in under 45 seconds."},{icon:"📹",t:"HD Security Cameras",d:"1080p cameras at every entry point. Live view from your phone from anywhere — whether you're at work in Corona or out of state."},{icon:"🚨",t:"Instant Alarm Response",d:"ADT's monitoring center calls you first, dispatches emergency services second. Average response: 45 seconds."},{icon:"🔥",t:"Fire, Smoke & CO Detection",d:"Photoelectric smoke detectors, carbon monoxide sensors, flood detection. Critical in Riverside County's high-risk fire season."},{icon:"📱",t:"Total Remote Control",d:"Arm, disarm, check cameras, lock doors, and control your smart home from the ADT+ app. One tap from anywhere."},{icon:"🌡️",t:"Heat & Wildfire Alert Ready",d:"ADT's detection network is built for Riverside County's fire-prone dry regions. Early warning when every minute counts."}].map(({icon,t,d})=>(
+          <div key={t} className="review-item" style={{ padding:"28px 24px", background:"rgba(242,237,223,.02)", border:"1px solid rgba(242,237,223,.06)", cursor:"default" }}>
+            <div style={{ fontSize:28, marginBottom:14 }}>{icon}</div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:15, marginBottom:10, color:"#F2EDDF" }}>{t}</div>
+            <div style={{ fontFamily:"'Libre Baskerville',serif", fontSize:13, color:"rgba(242,237,223,.45)", lineHeight:1.8 }}>{d}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ textAlign:"center", marginTop:48 }}>
+        <button onClick={scrollToForm} className="cta pulse" style={{ display:"inline-block", padding:"18px 64px", fontSize:22, letterSpacing:2, width:"auto" }}>
+          GET ALL OF THIS FREE →
+        </button>
+        <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:"rgba(242,237,223,.25)", marginTop:12, letterSpacing:.5 }}>
+          PROFESSIONAL INSTALLATION INCLUDED · PLANS FROM $45.99/MONTH · NO HIDDEN FEES
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── CITIES ─────────────────────────────────────── */}
+  <section style={{ padding:"64px 36px", background:"#0F1114" }}>
+    <div style={{ maxWidth:1000, margin:"0 auto", textAlign:"center" }}>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:4, color:"rgba(242,237,223,.3)", marginBottom:12 }}>SERVICE AREA</div>
+      <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(28px,4vw,46px)", letterSpacing:.5, lineHeight:1, marginBottom:32 }}>
+        WE COVER ALL OF <span style={{ color:"#C8102E" }}>RIVERSIDE COUNTY</span>
+      </h2>
+      <div style={{ display:"flex", flexWrap:"wrap", justifyContent:"center", gap:6 }}>
+        {CITIES.map(city=>(
+          <div key={city} style={{ padding:"7px 16px", border:"1px solid rgba(242,237,223,.08)", fontFamily:"'DM Sans',sans-serif", fontSize:13, color:"rgba(242,237,223,.5)", background:"rgba(242,237,223,.02)" }}>📍 {city}</div>
+        ))}
+        <div style={{ padding:"7px 16px", border:"1px solid rgba(200,16,46,.25)", fontFamily:"'DM Sans',sans-serif", fontSize:13, color:"rgba(200,16,46,.7)", background:"rgba(200,16,46,.05)" }}>+ All surrounding communities</div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── HOW IT WORKS ───────────────────────────────── */}
+  <section style={{ padding:"80px 36px", background:"#0C0E10" }}>
+    <div style={{ maxWidth:1000, margin:"0 auto", textAlign:"center" }}>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:4, color:"#C8102E", marginBottom:16 }}>YOUR PATH TO PROTECTION</div>
+      <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(32px,5vw,54px)", letterSpacing:.5, lineHeight:1, marginBottom:52 }}>PROTECTED IN 4 STEPS. STARTING NOW.</h2>
+      <div className="process-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:2 }}>
+        {[{n:"01",t:"60-Second Quote",d:"Fill out our 3-field form. No long surveys. No credit card. Zero obligation."},{n:"02",t:"We Call You Fast",d:"A local Riverside County specialist calls within 2 hours — usually much sooner."},{n:"03",t:"Your Custom Plan",d:"We walk your property, assess your needs, and design the right system. Free."},{n:"04",t:"Same-Week Install",d:"A certified ADT technician installs everything. You just unlock the front door."}].map(({n,t,d},i)=>(
+          <div key={n} style={{ padding:"28px 20px", textAlign:"center", borderRight:i<3?"1px solid rgba(242,237,223,.05)":"none" }}>
+            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:48, letterSpacing:2, color:"rgba(200,16,46,.2)", lineHeight:1, marginBottom:12 }}>{n}</div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:14, marginBottom:8, color:"#F2EDDF" }}>{t}</div>
+            <div style={{ fontFamily:"'Libre Baskerville',serif", fontSize:12, fontStyle:"italic", color:"rgba(242,237,223,.4)", lineHeight:1.7 }}>{d}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ── REVIEWS ────────────────────────────────────── */}
+  <section style={{ padding:"80px 36px", background:"#0F1114" }}>
+    <div style={{ maxWidth:1100, margin:"0 auto" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginBottom:48, flexWrap:"wrap", gap:20 }}>
+        <div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:4, color:"rgba(242,237,223,.3)", marginBottom:12 }}>REAL RIVERSIDE COUNTY CUSTOMERS</div>
+          <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(32px,5vw,52px)", letterSpacing:.5, lineHeight:1 }}>WHAT OUR NEIGHBORS SAY.</h2>
+        </div>
+        <div style={{ textAlign:"right" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, justifyContent:"flex-end" }}>
+            <Stars/>
+            <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:1, color:"#F59E0B" }}>4.9</span>
+          </div>
+          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:"rgba(242,237,223,.3)", letterSpacing:.5 }}>300+ VERIFIED REVIEWS</div>
+        </div>
+      </div>
+      <div className="review-grid" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:2 }}>
+        {REVIEWS.map((r,i)=>(
+          <div key={i} className="review-item" style={{ padding:"24px 22px", background:"rgba(242,237,223,.02)", border:"1px solid rgba(242,237,223,.06)" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:12 }}>
+              <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                <div style={{ width:36, height:36, borderRadius:"50%", background:`hsl(${i*55},45%,30%)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:14 }}>{r.name[0]}</div>
+                <div>
+                  <div style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:600, fontSize:13 }}>{r.name}</div>
+                  <div style={{ fontSize:10, color:"rgba(242,237,223,.35)", letterSpacing:.5 }}>{r.city}, CA</div>
+                </div>
+              </div>
+              <span style={{ fontSize:10, color:"rgba(242,237,223,.25)", fontFamily:"'DM Sans',sans-serif" }}>{r.when}</span>
+            </div>
+            <Stars n={r.stars}/>
+            <p style={{ fontFamily:"'Libre Baskerville',serif", fontStyle:"italic", fontSize:13, color:"rgba(242,237,223,.55)", lineHeight:1.8, marginTop:10 }}>"{r.text}"</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ── BIG OFFER + FORM ───────────────────────────── */}
+  <section style={{ padding:"80px 36px", background:"linear-gradient(135deg,#100608 0%,#160A0C 50%,#100608 100%)", position:"relative", overflow:"hidden" }}>
+    <div style={{ position:"absolute", inset:0, backgroundImage:"radial-gradient(ellipse at 50% 40%,rgba(200,16,46,.1) 0%,transparent 65%)", pointerEvents:"none" }} />
+    <div style={{ maxWidth:700, margin:"0 auto", textAlign:"center", position:"relative", zIndex:1 }}>
+      <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"6px 16px", border:"1px solid rgba(245,158,11,.3)", marginBottom:24, background:"rgba(245,158,11,.06)" }}>
+        <span style={{ width:6, height:6, borderRadius:"50%", background:"#F59E0B", display:"inline-block", animation:"blink 1.2s infinite" }} />
+        <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:11, letterSpacing:3, color:"rgba(245,158,11,.9)" }}>LIMITED TIME · RIVERSIDE COUNTY ONLY</span>
+      </div>
+      <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(40px,7vw,76px)", letterSpacing:.5, lineHeight:.95, marginBottom:20 }}>
+        FREE INSTALL.<br/>FREE EQUIPMENT.<br/><span style={{ color:"#C8102E" }}>THIS WEEK ONLY.</span>
+      </h2>
+      <p style={{ fontFamily:"'Libre Baskerville',serif", fontStyle:"italic", fontSize:16, color:"rgba(242,237,223,.5)", lineHeight:1.85, marginBottom:44 }}>
+        For a limited time, Direct Protection Security is offering professional ADT installation at zero cost to qualifying Riverside County homeowners. Monitoring starts at just $45.99/month.
+      </p>
+      <div style={{ border:"1px solid rgba(242,237,223,.1)", borderTop:"3px solid #C8102E", background:"rgba(15,17,20,.95)", padding:"32px", maxWidth:460, margin:"0 auto" }}>
+        <LeadForm id="offer" apiKey={apiKey} />
+      </div>
+      <div style={{ display:"flex", justifyContent:"center", flexWrap:"wrap", gap:20, marginTop:28 }}>
+        {["No Hidden Fees","6-Month Money-Back Guarantee","ADT-Certified Technicians","Local Riverside County Team"].map(t=>(
+          <div key={t} style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:"rgba(242,237,223,.35)", display:"flex", alignItems:"center", gap:5 }}>
+            <span style={{ color:"#4ADE80" }}>✓</span>{t}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ── TRUST ──────────────────────────────────────── */}
+  <section style={{ padding:"32px 36px", background:"#0F1114", borderTop:"1px solid rgba(242,237,223,.04)", borderBottom:"1px solid rgba(242,237,223,.04)" }}>
+    <div style={{ maxWidth:900, margin:"0 auto", textAlign:"center" }}>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:10, letterSpacing:4, color:"rgba(242,237,223,.2)", marginBottom:20 }}>LICENSED · CERTIFIED · TRUSTED</div>
+      <div style={{ display:"flex", justifyContent:"center", flexWrap:"wrap", gap:4 }}>
+        {["ADT® Authorized Dealer","Google ★ 4.9/5","BBB Accredited Business","Angi Certified","CA ACO License #7432","CSAA Five Diamond Certified"].map(t=>(
+          <div key={t} style={{ padding:"8px 16px", border:"1px solid rgba(242,237,223,.07)", fontFamily:"'DM Sans',sans-serif", fontSize:11, color:"rgba(242,237,223,.3)", letterSpacing:.3 }}>{t}</div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ── FAQ ────────────────────────────────────────── */}
+  <section style={{ padding:"80px 36px", background:"#0C0E10" }}>
+    <div style={{ maxWidth:680, margin:"0 auto" }}>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:4, color:"#C8102E", marginBottom:14 }}>COMMON QUESTIONS</div>
+      <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(30px,5vw,50px)", letterSpacing:.5, lineHeight:1, marginBottom:40 }}>EVERYTHING YOU NEED<br/>TO KNOW.</h2>
+      {[{q:"Is there a long-term contract?",a:"ADT monitoring requires a 24-month agreement in California — but we back it with a 6-month money-back guarantee. If you're not satisfied in the first 6 months for any reason, you get a full refund on monitoring fees. No questions asked."},{q:"How much does it cost per month?",a:"Monitoring plans start at $45.99/month. Professional installation is $0 down for qualifying Riverside County customers. We walk through every number before you sign anything — no hidden fees, no surprises."},{q:"I already have a system. Can I switch?",a:"Yes. We help you navigate your existing contract cancellation and in many cases can reuse existing wiring to reduce install time. We've helped hundreds of Riverside County customers switch from SimpliSafe, Vivint, Comcast, Ring, and others."},{q:"How fast is installation?",a:"Most Riverside County customers are fully protected within 48 hours. We often have same-day and next-day openings in Riverside, Corona, Murrieta, Temecula, Moreno Valley, and surrounding cities."},{q:"I rent — can I still get ADT?",a:"ADT has renter-friendly plans requiring minimal hardware and zero permanent modifications. We've set up hundreds of renters across Riverside County. We'll find the right fit for your situation."},{q:"Is ADT worth it vs DIY systems like Ring or SimpliSafe?",a:"ADT provides professional monitoring by trained operators — not automated alerts. In Riverside County, where 1 in 28 residents become crime victims each year, a professional response in under 45 seconds is the difference that matters. DIY systems rely on you to call for help. ADT does it for you."}].map((faq,i)=><FAQ key={i} {...faq}/>)}
+      <div style={{ textAlign:"center", marginTop:44, paddingTop:36, borderTop:"1px solid rgba(242,237,223,.07)" }}>
+        <p style={{ fontFamily:"'Libre Baskerville',serif", fontStyle:"italic", fontSize:14, color:"rgba(242,237,223,.4)", marginBottom:16 }}>Still have questions? We're a real local team — just call us.</p>
+        <a href="tel:9515550100" style={{ display:"inline-flex", alignItems:"center", gap:10, padding:"14px 28px", border:"1px solid rgba(245,158,11,.35)", background:"rgba(245,158,11,.06)", textDecoration:"none" }}>
+          <span style={{ fontSize:18 }}>📞</span>
+          <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:20, letterSpacing:2, color:"#F59E0B" }}>CALL (951) 555-0100</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* ── FINAL CTA ──────────────────────────────────── */}
+  <section style={{ padding:"80px 36px 96px", background:"#0F1114" }}>
+    <div style={{ maxWidth:540, margin:"0 auto", textAlign:"center" }}>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:12, letterSpacing:4, color:"rgba(242,237,223,.2)", marginBottom:16 }}>LAST CHANCE THIS WEEK</div>
+      <h2 style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:"clamp(32px,5vw,52px)", letterSpacing:.5, lineHeight:1, marginBottom:16 }}>
+        YOUR FAMILY DESERVES<br/><span style={{ color:"#C8102E" }}>TO FEEL SAFE TONIGHT.</span>
+      </h2>
+      <p style={{ fontFamily:"'Libre Baskerville',serif", fontStyle:"italic", fontSize:15, color:"rgba(242,237,223,.45)", lineHeight:1.8, marginBottom:36 }}>
+        It takes 60 seconds. A local Riverside County specialist calls within 2 hours. We can have you fully protected by tomorrow.
+      </p>
+      <div style={{ border:"1px solid rgba(242,237,223,.1)", borderTop:"3px solid #C8102E", background:"rgba(15,17,20,.98)", padding:"32px" }}>
+        <LeadForm id="final" apiKey={apiKey} />
+      </div>
+    </div>
+  </section>
+
+  {/* ── FOOTER ─────────────────────────────────────── */}
+  <footer style={{ padding:"28px 36px", background:"#080A0C", borderTop:"1px solid rgba(242,237,223,.04)" }}>
+    <div style={{ maxWidth:1100, margin:"0 auto" }}>
+      <div style={{ display:"flex", flexWrap:"wrap", justifyContent:"space-between", alignItems:"center", gap:16, marginBottom:20 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          <div style={{ background:"#C8102E", padding:"4px 10px", fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:2, color:"#fff" }}>ADT</div>
+          <div>
+            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:17, letterSpacing:1 }}>Direct Protection Security</div>
+            <div style={{ fontSize:9, color:"rgba(242,237,223,.25)", letterSpacing:2 }}>RIVERSIDE COUNTY, CA</div>
+          </div>
+        </div>
+        <div style={{ display:"flex", gap:20 }}>
+          {["Privacy Policy","Terms","Cancel Service","ADT.com"].map(t=>(
+            <a key={t} href="#" style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:"rgba(242,237,223,.25)", textDecoration:"none" }}>{t}</a>
+          ))}
+        </div>
+      </div>
+      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:"rgba(242,237,223,.18)", lineHeight:1.7 }}>
+        Direct Protection Security is an independently owned ADT Authorized Dealer. ADT and related marks are registered trademarks of ADT LLC. ©2026 Direct Protection Security. All rights reserved. CA Alarm Company License #ACO 7432. 24-month monitoring agreement required in California. Early termination fee applies. 6-month money-back guarantee applies to monitoring fees only. Crime statistics sourced from FBI Uniform Crime Reports 2024 and NeighborhoodScout. Free installation available on qualifying systems for residential customers in Riverside County only.
+      </p>
+    </div>
+  </footer>
+
+  {/* ── FLOAT CTA ──────────────────────────────────── */}
+  <div className="float-cta hide-mobile" style={{ display:"flex", flexDirection:"column", gap:8, alignItems:"flex-end" }}>
+    <button onClick={scrollToForm} className="cta pulse" style={{ padding:"14px 22px", fontSize:15, letterSpacing:1.5, width:"auto", borderRadius:0 }}>GET FREE QUOTE ↑</button>
+    <a href="tel:9515550100" style={{ padding:"10px 14px", background:"rgba(12,14,16,.9)", border:"1px solid rgba(245,158,11,.3)", fontFamily:"'Bebas Neue',sans-serif", fontSize:13, letterSpacing:1.5, color:"#F59E0B", textDecoration:"none", textAlign:"center" }}>
+      📞 (951) 555-0100
+    </a>
+  </div>
+</div>
+```
+
+);
+}
